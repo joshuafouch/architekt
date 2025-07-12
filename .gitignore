@@ -1,0 +1,3 @@
+# ignore the error log file
+architekt-install-errors.log
+test.sh
