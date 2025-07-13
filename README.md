@@ -43,6 +43,7 @@ cd architekt
 | Flag               | Description                                 |
 | ------------------ | ------------------------------------------- |
 | `-h`, `--help`     | Display this help message                   |
+| `--dry-run`        | testing environment                         |
 | `-a`, `--all`      | Install everything (default)                |
 | `-p`, `--packages` | Install all base packages                   |
 | `-f`, `--flatpaks` | Install flatpaks (like Discord)             |
