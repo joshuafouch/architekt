@@ -28,10 +28,16 @@ ENABLE_SERVICES=false
 # stowing dotfiles
 STOW_DOTS=false
 
+# dry run for testing
+DRY_RUN=false
+
 # config variables END #################################
 
 # exit on any error
 set -e
+
+# export DRY_RUN variable for use in utils.sh
+export DRY_RUN
 
 # source utility functions
 source utils.sh
@@ -55,6 +61,16 @@ while [[ $# -gt 0 ]]; do
     -h | --help)
         showhelp
         exit 0
+        ;;
+    --dry-run)
+        DRY_RUN=true
+        # if user does not specify any other flag, set all flags to true
+        INSTALL_PKGS=true
+        INSTALL_EXTRAS=true
+        INSTALL_FLATPAKS=true
+        ENABLE_SERVICES=true
+        STOW_DOTS=true
+        shift
         ;;
     -a | --all)
         INSTALL_PKGS=true
@@ -94,9 +110,42 @@ done
 
 # architekt configuration via flags end #############################################
 
+# if user picks one of these three options, a system update is needed
+if [[ "$INSTALL_PKGS" == true || "$INSTALL_EXTRAS" == true || "$INSTALL_FLATPAKS" == true ]]; then
+
+    echo "updating system..."
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "[DRY-RUN] sudo pacman -Syu --noconfirm"
+    else
+
+        # if user chooses to install extras, make sure needed GPG keys are imported
+        if [[ "$INSTALL_EXTRAS" == true ]]; then
+            add_cider
+        fi
+
+        # update the system first
+        sudo pacman -Syu --noconfirm
+        echo "system update over!"
+    fi
+
+fi
+
+# if user picks one of these two options, the yay aur must be installed
+if [[ "$INSTALL_PKGS" == true || "$INSTALL_EXTRAS" == true ]]; then
+
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "[DRY-RUN] would download the yay AUR"
+        install_yay
+    else
+        # install yay aur
+        install_yay
+    fi
+
+fi
+
 # if you want to install system utils and packages (from packages.conf)
-if [[ "$INSTALLPKGS" == true ]]; then
-    # Source the package list
+if [[ "$INSTALL_PKGS" == true ]]; then
+    # source the package list
     if [ ! -f "packages.conf" ]; then
         echo "error: packages.conf not found!"
         exit 1
@@ -104,12 +153,78 @@ if [[ "$INSTALLPKGS" == true ]]; then
 
     source packages.conf
 
-    # update the system first
-    echo "updating system..."
-    sudo pacman -Syu --noconfirm
+    # install packages (see function in utils.sh)
+    echo "installing system utilities..."
+    install_packages "${SYS_UTILS[@]}"
+
+    echo "installing dev utilies..."
+    install_packages "${DEV_UTILS[@]}"
+
+    echo "installing desktop utilies..."
+    install_packages "${DESKTOP_UTILS[@]}"
+
+    echo "installing fonts..."
+    install_packages "${FONTS[@]}"
+
+    echo "installing necessities..."
+    install_packages "${ESSENTIALS[@]}"
+
 fi
 
-print_logo
+# if you want to install your extra apps (from extras.conf)
+if [[ "$INSTALL_EXTRAS" == true ]]; then
+
+    # source the app list
+    if [ ! -f "extras.conf" ]; then
+        echo "error: extras.conf not found!"
+        exit 1
+    fi
+
+    source extras.conf
+
+    # install extra apps
+    echo "installing extra applications..."
+    install_packages "${EXTRAS[@]}"
+
+fi
+
+# if you want to install your flatpak packages (from flatpaks.conf)
+if [[ "$INSTALL_FLATPAKS" == true ]]; then
+    # source the app list
+    if [ ! -f "flatpaks.conf" ]; then
+        echo "error: flatpaks.conf not found!"
+        exit 1
+    fi
+
+    source flatpaks.conf
+
+    install_flatpaks "${FLATPAKS[@]}"
+
+fi
+
+# if you want to enable specified services (from services.conf)
+if [[ "$ENABLE_SERVICES" == true ]]; then
+    # source the app list
+    if [ ! -f "services.conf" ]; then
+        echo "error: services.conf not found!"
+        exit 1
+    fi
+
+    source services.conf
+
+    # enable service function
+    enable_services "${SERVICES[@]}"
+
+fi
+
+# if you want to stow your dotfiles from your git repo (see stow_dotfiles() in utils.sh)
+if [[ "$STOW_DOTS" == true ]]; then
+
+    # stow ur dotfiles
+    stow_dotfiles
+
+fi
+
 echo "setup complete!"
 echo "error logs in architekt-install-errors.log"
 echo "please reboot system to enter your environment"

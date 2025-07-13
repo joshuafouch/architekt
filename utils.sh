@@ -17,6 +17,7 @@ showhelp() {
     echo "usage: $0 [OPTION]"
     echo "options:"
     echo "  -h, --help                 display this help message"
+    echo "  --dry-run                  for testing script without executing install commands"
     echo "  -a, --all                  install everything (DEFAULT)"
     echo "  -p, --packages             install all base packages"
     echo "  -f, --flatpaks             install flatpaks (like discord)"
@@ -49,23 +50,41 @@ install_packages() {
 
     if [ ${#to_install[@]} -ne 0 ]; then
         echo "Installing: ${to_install[*]}"
-        yay -S --noconfirm "${to_install[@]}"
+        if [[ "$DRY_RUN" == true ]]; then
+            echo "[DRY-RUN] skipping installs"
+        else
+            yay -S --noconfirm "${to_install[@]}"
+        fi
+    else
+        if [[ "$DRY_RUN" == true ]]; then
+            echo "all packages already installed: ${packages[*]}"
+        else
+            echo "all packages already installed!"
+        fi
     fi
 }
 
 # adding cider (an Apple Music player) to the pacman repository
 add_cider() {
+
+    # if dry run
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "[DRY-RUN] Would import Cider's GPG key"
+        echo "[DRY-RUN] Would Append Cider data into /etc/pacman.conf"
+        return
+    fi
+
     # import GPG key:
     if ! pacman-key --list-keys A0CD6B993438E22634450CDD2A236C3F42A61682 &>/dev/null; then
-        echo "Importing Cider GPG Key..."
+        echo "importing cider gpg key..."
         curl -s https://repo.cider.sh/ARCH-GPG-KEY | sudo pacman-key --add -
         sudo pacman-key --lsign-key A0CD6B993438E22634450CDD2A236C3F42A61682
     else
-        echo "Cider GPG Key already added!"
+        echo "cider gpg key already added!"
     fi
 
     if ! grep -q "\[cidercollective\]" /etc/pacman.conf; then
-        echo "Adding Cider into your pacman repository!"
+        echo "adding cider into your pacman repository"
 
         # add the repo to /etc/pacman.conf
         cat <<'EOF' | sudo tee -a /etc/pacman.conf
@@ -77,15 +96,33 @@ Server = https://repo.cider.sh/arch
 EOF
 
     else
-        echo "Cider is already added in the pacman repository!"
+        echo "cider is already added in the pacman repository!"
     fi
 }
 
-# install yay AUR helper if not present
+# install yay aur helper if not present
 install_yay() {
 
+    # if dry run
+    if [ "$DRY_RUN" == true ]; then
+        echo "[DRY-RUN] Would check if yay is installed and install it"
+        if ! command -v yay &>/dev/null; then
+
+            if [[ ! -d "yay" ]]; then
+                echo "  would need to clone yay repo: https://aur.archlinux.org/yay.git"
+                echo "  would build yay package and then remove the yay repository"
+            else
+                echo "  there is a yay directory in this system but yay is not a command, this directory will be removed"
+            fi
+
+        else
+            echo "  yay is already installed in this system"
+        fi
+        return
+    fi
+
     if ! command -v yay &>/dev/null; then
-        echo "Installing yay AUR helper..."
+        echo "installing yay aur helper..."
         sudo pacman -S --needed git base-devel --noconfirm
         if [[ ! -d "yay" ]]; then
             echo "Cloning yay repository..."
@@ -118,18 +155,24 @@ enable_services() {
     fi
 
     echo "configuring services..."
-    for service in "${SERVICES[@]}"; do
-        if ! systemctl is-enabled "$service" &>/dev/null; then
-            echo "enabling $service..."
-            sudo systemctl enable "$service"
+    for service in "${services[@]}"; do
+
+        if [ "$DRY_RUN" == true ]; then
+            echo "[DRY-RUN] Would enable service: $service"
         else
-            echo "$service is already enabled"
+            if ! systemctl is-enabled "$service" &>/dev/null; then
+                echo "enabling $service..."
+                sudo systemctl enable "$service"
+            else
+                echo "$service is already enabled"
+            fi
         fi
+
     done
 }
 
 # install flatpaks
-install_flatpacks() {
+install_flatpaks() {
 
     local flatpaks=("$@")
 
@@ -138,13 +181,21 @@ install_flatpacks() {
         return
     fi
 
+    echo "installing flatpaks..."
+
     for pak in "${flatpaks[@]}"; do
-        if ! flatpak list | grep -i "$pak" &>/dev/null; then
-            echo "installing flatpak: $pak"
-            flatpak install --noninteractive "$pak"
+
+        if [ "$DRY_RUN" == true ]; then
+            echo "[DRY-RUN] Would install: $pak"
         else
-            echo "flatpak already installed: $pak"
+            if ! flatpak list | grep -i "$pak" &>/dev/null; then
+                echo "installing flatpak: $pak"
+                flatpak install --noninteractive "$pak"
+            else
+                echo "flatpak already installed: $pak"
+            fi
         fi
+
     done
 
 }
@@ -156,6 +207,12 @@ stow_dotfiles() {
     REPO_URL="https://github.com/joshuafouch/dotfiles"
     REPO_NAME="dotfiles"
 
+    if [ "$DRY_RUN" == true ]; then
+        echo "[DRY-RUN] Would check/install GNU Stow"
+        echo "[DRY-RUN] Would clone $REPO_URL if not present"
+        echo "[DRY-RUN] Would stow your all configurations."
+        return
+    fi
     if ! is_installed stow; then
         echo "installing dependency (GNU Stow)..."
         yay -S --noconfirm stow
@@ -173,16 +230,37 @@ stow_dotfiles() {
     # Check if the clone was successful
     if [ $? -eq 0 ]; then
         cd "$REPO_NAME"
+        echo "stowing i3..."
         stow i3
+
+        echo "stowing zsh..."
         stow zsh
+
+        echo "stowing nvim..."
         stow nvim
+
+        echo "stowing rofi..."
         stow rofi
+
+        echo "stowing polybar..."
         stow polybar
+
+        echo "stowing dunst..."
         stow dunst
+
+        echo "stowing fastfetch..."
         stow fastfetch
+
+        echo "stowing git..."
         stow git
+
+        echo "stowing kitty..."
         stow kitty
+
+        echo "stowing yazi..."
         stow yazi
+
+        echo "stowing cava..."
         stow cava
         # add other essential dotfiles here
     else
