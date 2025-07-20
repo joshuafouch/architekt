@@ -227,7 +227,11 @@ fi
 
 echo ""
 echo "setup complete!"
+echo ""
 echo "error logs in architekt-install-errors.log"
+echo "NOTE: to show XFCE-settings-manager in rofi, comment the OnlyShowIn=XFCE line in /usr/share/applications/xfce-settings-manager.desktop"
+echo "NOTE: to enable a desktop manager, you must use systemctl enable"
+echo ""
 echo "please reboot system to enter your environment"
 
 # architekt END! #######################################################################
