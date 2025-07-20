@@ -296,12 +296,15 @@ interactive_flathub() {
 stow_dotfiles() {
 
     ORIGINAL_DIR=$(pwd)
-    REPO_URL="https://github.com/joshuafouch/dotfiles"
-    REPO_NAME="dotfiles"
+    DOTFILE_REPO="https://github.com/joshuafouch/dotfiles"
+    DOTFILE_REPO_NAME="dotfiles"
+
+    WALLPAPER_REPO="https://github.com/joshuafouch/dotfiles-wallpapers"
+    WALLPAPER_REPO_NAME="dotfiles-wallpapers"
 
     if [ "$DRY_RUN" == true ]; then
         echo "[DRY-RUN] Would check/install GNU Stow"
-        echo "[DRY-RUN] Would clone $REPO_URL if not present"
+        echo "[DRY-RUN] Would clone $DOTFILE_REPO if not present"
         echo "[DRY-RUN] Would stow your all configurations."
         return
     fi
@@ -313,15 +316,15 @@ stow_dotfiles() {
     cd ~
 
     # Check if the repository already exists
-    if [ -d "$REPO_NAME" ]; then
-        echo "repository '$REPO_NAME' already exists. skipping clone"
+    if [ -d "$DOTFILE_REPO_NAME" ]; then
+        echo "repository '$DOTFILE_REPO_NAME' already exists. skipping clone"
     else
-        git clone "$REPO_URL"
+        git clone "$DOTFILE_REPO"
     fi
 
     # Check if the clone was successful
     if [ $? -eq 0 ]; then
-        cd "$REPO_NAME"
+        cd "$DOTFILE_REPO_NAME"
         echo "stowing i3..."
         stow i3
 
@@ -354,7 +357,14 @@ stow_dotfiles() {
 
         echo "stowing cava..."
         stow cava
+
+        echo "stowing themes..."
+        stow themes
+
+        echo "stowing icons..."
+        stow icons
         # add other essential dotfiles here
+        #
     else
         echo "failed to clone the repository."
         exit 1
