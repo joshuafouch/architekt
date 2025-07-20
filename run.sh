@@ -65,11 +65,11 @@ while [[ $# -gt 0 ]]; do
     --dry-run)
         DRY_RUN=true
         # if user does not specify any other flag, set all flags to true
-        INSTALL_PKGS=true
-        INSTALL_EXTRAS=true
-        INSTALL_FLATPAKS=true
-        ENABLE_SERVICES=true
-        STOW_DOTS=true
+        #INSTALL_PKGS=true
+        #INSTALL_EXTRAS=true
+        #INSTALL_FLATPAKS=true
+        #ENABLE_SERVICES=true
+        #STOW_DOTS=true
         shift
         ;;
     -a | --all)
@@ -184,7 +184,7 @@ if [[ "$INSTALL_EXTRAS" == true ]]; then
 
     # install extra apps
     echo "installing extra applications..."
-    install_packages "${EXTRAS[@]}"
+    interactive_yay "${EXTRAS[@]}"
 
 fi
 
@@ -198,7 +198,7 @@ if [[ "$INSTALL_FLATPAKS" == true ]]; then
 
     source flatpaks.conf
 
-    install_flatpaks "${FLATPAKS[@]}"
+    interactive_flathub "${FLATPAKS[@]}"
 
 fi
 
@@ -225,6 +225,7 @@ if [[ "$STOW_DOTS" == true ]]; then
 
 fi
 
+echo ""
 echo "setup complete!"
 echo "error logs in architekt-install-errors.log"
 echo "please reboot system to enter your environment"

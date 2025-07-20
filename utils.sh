@@ -37,6 +37,34 @@ is_group_installed() {
     pacman -Qg "$1" &>/dev/null
 }
 
+# Function to see if user wants to install a certain program
+wants_to_install() {
+
+    local pkg="$1"
+
+    if [[ "$DRY_RUN" == true ]]; then
+        while true; do
+            echo ""
+            read -rp "[DRY-RUN] Would you like to install ${pkg} [Y/n]: " ans
+            case "${ans,,}" in
+            y | "") return 0 ;; # install
+            n) return 1 ;;      # skip
+            *) echo "[DRY-RUN] please answer 'y' or 'n'. " ;;
+            esac
+        done
+    else
+        while true; do
+            echo ""
+            read -rp "Would you like to install  ${pkg} [Y/n]: " ans
+            case "${ans,,}" in
+            y | "") return 0 ;; # install
+            n) return 1 ;;      # skip
+            *) echo "please answer 'y' or 'n'. " ;;
+            esac
+        done
+    fi
+}
+
 # Function to install packages if not already installed
 install_packages() {
     local packages=("$@")
@@ -193,6 +221,70 @@ install_flatpaks() {
                 flatpak install --noninteractive "$pak"
             else
                 echo "flatpak already installed: $pak"
+            fi
+        fi
+
+    done
+
+}
+
+interactive_yay() {
+
+    local programs=("$@")
+
+    if [ ${#programs[@]} -eq 0 ]; then
+        echo "no args given"
+        return
+    fi
+
+    echo "interactive install session start..."
+
+    for prog in "${programs[@]}"; do
+
+        if [ "$DRY_RUN" == true ]; then
+            if wants_to_install "$prog"; then
+                echo "--> would install $prog..."
+            else
+                echo "--> would skip $prog"
+            fi
+        else
+            if wants_to_install "$prog"; then
+                echo "--> installing $prog..."
+                yay -S --noconfirm "$prog"
+            else
+                echo "--> skipping $prog"
+            fi
+        fi
+
+    done
+
+}
+
+interactive_flathub() {
+
+    local programs=("$@")
+
+    if [ ${#programs[@]} -eq 0 ]; then
+        echo "no args given"
+        return
+    fi
+
+    echo "interactive install session start..."
+
+    for prog in "${programs[@]}"; do
+
+        if [ "$DRY_RUN" == true ]; then
+            if wants_to_install "$prog"; then
+                echo "--> would install $prog..."
+            else
+                echo "--> would skip $prog"
+            fi
+        else
+            if wants_to_install "$prog"; then
+                echo "--> installing $prog..."
+                flatpak install --noninteractive "$prog"
+            else
+                echo "--> skipping $prog"
             fi
         fi
 
