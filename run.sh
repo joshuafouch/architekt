@@ -16,6 +16,9 @@ exec 2> >(tee -a "architekt-install-errors.log")
 # main packages
 INSTALL_PKGS=false
 
+# no-desktop setup
+NO_DESKTOP=false
+
 # install my apps
 INSTALL_EXTRAS=false
 
@@ -50,6 +53,7 @@ print_logo
 # install everything if no args
 if [ $# -eq 0 ]; then
     INSTALL_PKGS=true
+    NO_DESKTOP=true
     INSTALL_EXTRAS=true
     INSTALL_FLATPAKS=true
     ENABLE_SERVICES=true
@@ -67,6 +71,7 @@ while [[ $# -gt 0 ]]; do
         # if user does not specify any other flag, set all flags to true
         #INSTALL_PKGS=true
         #INSTALL_EXTRAS=true
+        NO_DESKTOP=true
         #INSTALL_FLATPAKS=true
         #ENABLE_SERVICES=true
         #STOW_DOTS=true
@@ -74,6 +79,7 @@ while [[ $# -gt 0 ]]; do
         ;;
     -a | --all)
         INSTALL_PKGS=true
+        NO_DESKTOP=true
         INSTALL_EXTRAS=true
         INSTALL_FLATPAKS=true
         ENABLE_SERVICES=true
@@ -82,6 +88,7 @@ while [[ $# -gt 0 ]]; do
         ;;
     -p | --packages)
         INSTALL_PKGS=true
+        NO_DESKTOP=false
         shift
         ;;
     -f | --flatpaks)
@@ -160,8 +167,12 @@ if [[ "$INSTALL_PKGS" == true ]]; then
     echo "installing dev utilies..."
     install_packages "${DEV_UTILS[@]}"
 
-    echo "installing desktop utilies..."
-    install_packages "${DESKTOP_UTILS[@]}"
+    if [[ "$NO_DESKTOP" == false ]]; then
+
+        echo "installing desktop utilies..."
+        install_packages "${DESKTOP_UTILS[@]}"
+
+    fi
 
     echo "installing fonts..."
     install_packages "${FONTS[@]}"

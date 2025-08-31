@@ -18,8 +18,8 @@ showhelp() {
     echo "options:"
     echo "  -h, --help                 display this help message"
     echo "  --dry-run                  for testing script without executing install commands"
-    echo "  -a, --all                  install everything (DEFAULT)"
-    echo "  -p, --packages             install all base packages"
+    echo "  -a, --all                  install everything (DEFAULT: WITHOUT DESKTOP ENV)"
+    echo "  -p, --packages             install all base packages (WITH DESKTOP ENV)"
     echo "  -f, --flatpaks             install flatpaks (like discord)"
     echo "  -e, --extras               install extra apps (like browser)"
     echo "  -s, --services             enable necessary services (like network)"
@@ -363,6 +363,12 @@ stow_dotfiles() {
 
         echo "stowing icons..."
         stow icons
+
+        echo "stowing mpd..."
+        stow mpd
+
+        echo "stowing rmpc..."
+        stow rmpc
         # add other essential dotfiles here
         #
     else
