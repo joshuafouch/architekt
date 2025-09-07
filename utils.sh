@@ -12,7 +12,7 @@ print_logo() {
   ███    ███   ███    ███ ███    ███   ███    ███   ███      ███       ███    ███   ███ ▀███▄     ███     
   ███    █▀    ███    ███ ████████▀    ███    █▀    █▀      ▄████▀     ██████████   ███   ▀█▀    ▄████▀   
                ███    ███                                                           ▀                                                                  
-                              a customization program for arch linux
+                              a customization program for arch linux by joshua fouch
 EOF
 }
 
