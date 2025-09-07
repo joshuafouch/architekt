@@ -3,12 +3,16 @@
 # print the logo
 print_logo() {
     cat <<"EOF"
-    ___              __    _ __       __   __ 
-   /   |  __________/ /_  (_) /____  / /__/ /_
-  / /| | / ___/ ___/ __ \/ / __/ _ \/ //_/ __/  
- / ___ |/ /  / /__/ / / / / /_/  __/ ,< / /_    a custom arch linux install by joshuafouch
-/_/  |_/_/   \___/_/ /_/_/\__/\___/_/|_|\__/    forked from typecraft-dev/crucible 
-                                              
+    ▄████████    ▄████████  ▄████████    ▄█    █▄     ▄█      ███        ▄████████    ▄█   ▄█▄     ███     
+  ███    ███   ███    ███ ███    ███   ███    ███   ███  ▀█████████▄   ███    ███   ███ ▄███▀ ▀█████████▄ 
+  ███    ███   ███    ███ ███    █▀    ███    ███   ███▌    ▀███▀▀██   ███    █▀    ███▐██▀      ▀███▀▀██ 
+  ███    ███  ▄███▄▄▄▄██▀ ███         ▄███▄▄▄▄███▄▄ ███▌     ███   ▀  ▄███▄▄▄      ▄█████▀        ███   ▀ 
+▀███████████ ▀▀███▀▀▀▀▀   ███        ▀▀███▀▀▀▀███▀  ███▌     ███     ▀▀███▀▀▀     ▀▀█████▄        ███     
+  ███    ███ ▀███████████ ███    █▄    ███    ███   ███      ███       ███    █▄    ███▐██▄       ███     
+  ███    ███   ███    ███ ███    ███   ███    ███   ███      ███       ███    ███   ███ ▀███▄     ███     
+  ███    █▀    ███    ███ ████████▀    ███    █▀    █▀      ▄████▀     ██████████   ███   ▀█▀    ▄████▀   
+               ███    ███                                                           ▀                                                                  
+                              a customization program for arch linux
 EOF
 }
 
@@ -325,8 +329,8 @@ stow_dotfiles() {
     # Check if the clone was successful
     if [ $? -eq 0 ]; then
         cd "$DOTFILE_REPO_NAME"
-        echo "stowing i3..."
-        stow i3
+        #echo "stowing i3..."
+        #stow i3
 
         echo "stowing zsh..."
         stow zsh
@@ -334,20 +338,20 @@ stow_dotfiles() {
         echo "stowing nvim..."
         stow nvim
 
-        echo "stowing rofi..."
-        stow rofi
+        #echo "stowing rofi..."
+        #stow rofi
 
-        echo "stowing polybar..."
-        stow polybar
+        #echo "stowing polybar..."
+        #stow polybar
 
-        echo "stowing dunst..."
-        stow dunst
+        #echo "stowing dunst..."
+        #stow dunst
 
-        echo "stowing fastfetch..."
-        stow fastfetch
+        #echo "stowing fastfetch..."
+        #stow fastfetch
 
-        echo "stowing git..."
-        stow git
+        #echo "stowing git..."
+        #stow git
 
         echo "stowing kitty..."
         stow kitty
@@ -358,11 +362,11 @@ stow_dotfiles() {
         echo "stowing cava..."
         stow cava
 
-        echo "stowing themes..."
-        stow themes
+        #echo "stowing themes..."
+        #stow themes
 
-        echo "stowing icons..."
-        stow icons
+        #echo "stowing icons..."
+        #stow icons
 
         echo "stowing mpd..."
         stow mpd
